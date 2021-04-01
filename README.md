@@ -1,2 +1,2 @@
 # RestaurantAPI
-A RESTfull API sample with Swagger documentation.
+A RESTful API sample with Swagger documentation.
