@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using RestaurantAPI.Entities;
 using RestaurantAPI.Models;
 using RestaurantAPI.Services;
 using System;
@@ -17,9 +16,8 @@ namespace RestaurantAPI.Controllers
     {
         private readonly IRestaurantService _restaurantService;
 
-        public RestaurantController(RestaurantDbContext dbContext, IMapper mapper, IRestaurantService restaurantService)
+        public RestaurantController(IRestaurantService restaurantService)
         {
-
             _restaurantService = restaurantService;
         }
 
@@ -42,11 +40,11 @@ namespace RestaurantAPI.Controllers
 
 
         [HttpPost]
-        public ActionResult CreateRestaurant([FromBody] CreateRestaurantDto dto)
+        public ActionResult Create([FromBody] CreateRestaurantDto dto)
         {
-            var id = _restaurantService.Create(dto);
+            var newRestaurantId = _restaurantService.Create(dto);
 
-            return Created("/api/restaurant/{id}", null);
+            return Created($"/api/restaurant/{newRestaurantId}", null);
         }
 
         [HttpGet]
@@ -58,7 +56,7 @@ namespace RestaurantAPI.Controllers
         }
 
         [HttpGet("{id}")]
-        public ActionResult<RestaurantDto> Get([FromRoute] int id)
+        public ActionResult<RestaurantDto> GetById([FromRoute] int id)
         {
             var restaurantDto = _restaurantService.GetById(id);
 
