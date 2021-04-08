@@ -12,7 +12,7 @@ namespace RestaurantAPI.Controllers
     [ApiController]
     public class AccountController : ControllerBase
     {
-        public IAccountService _service { get; }
+        private readonly IAccountService _service;
 
         public AccountController(IAccountService service)
         {

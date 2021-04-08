@@ -23,6 +23,7 @@ namespace RestaurantAPI.Services
             _dbContext = dbContext;
             _passwordHasher = passwordHasher;
         }
+
         public void RegisterUser(RegisterUserDto dto)
         {
             var newUser = new User()
