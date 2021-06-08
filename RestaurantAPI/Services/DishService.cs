@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using RestaurantAPI.Authorization;
 using RestaurantAPI.Entities;
 using RestaurantAPI.Exceptions;
 using RestaurantAPI.Models;
@@ -24,16 +26,29 @@ namespace RestaurantAPI.Services
     {
         private readonly RestaurantDbContext _dbContext;
         private readonly IMapper _mapper;
+        private readonly IAuthorizationService _authorizationService;
+        private readonly IUserContextService _userContextService;
 
-        public DishService(RestaurantDbContext dbContext, IMapper mapper)
+        public DishService(RestaurantDbContext dbContext, IMapper mapper, IAuthorizationService authorizationService,
+            IUserContextService userContextService)
         {
             _dbContext = dbContext;
             _mapper = mapper;
+            _authorizationService = authorizationService;
+            _userContextService = userContextService;
         }
 
         public int Create(int restaurantId, CreateDishDto dto)
         {
             var restaurant = GetRestaurantById(restaurantId);
+
+            var authorizationResult = _authorizationService.AuthorizeAsync(_userContextService.User, restaurant,
+                new ResourceOperationRequirement(ResourceOperation.Create)).Result;
+
+            if (!authorizationResult.Succeeded)
+            {
+                throw new ForbidException();
+            }
 
             var dish = _mapper.Map<Dish>(dto);
             dish.RestaurantId = restaurantId;
@@ -47,6 +62,14 @@ namespace RestaurantAPI.Services
         public void Delete(int restaurantId, int dishId)
         {
             var restaurant = GetRestaurantById(restaurantId);
+
+            var authorizationResult = _authorizationService.AuthorizeAsync(_userContextService.User, restaurant,
+                new ResourceOperationRequirement(ResourceOperation.Delete)).Result;
+
+            if (!authorizationResult.Succeeded)
+            {
+                throw new ForbidException();
+            }
 
             var dish = restaurant.Dishes.FirstOrDefault(d => d.Id == dishId);
 
@@ -62,7 +85,15 @@ namespace RestaurantAPI.Services
         {
             var restaurant = GetRestaurantById(restaurantId);
 
-            _dbContext.RemoveRange(restaurant.Dishes);
+            var authorizationResult = _authorizationService.AuthorizeAsync(_userContextService.User, restaurant,
+                new ResourceOperationRequirement(ResourceOperation.Create)).Result;
+
+            if (!authorizationResult.Succeeded)
+            {
+                throw new ForbidException();
+            }
+
+            _dbContext.Dishes.RemoveRange(restaurant.Dishes);
             _dbContext.SaveChanges();
         }
 
