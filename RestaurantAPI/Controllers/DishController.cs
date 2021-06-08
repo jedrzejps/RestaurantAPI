@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RestaurantAPI.Entities;
 using RestaurantAPI.Exceptions;
 using RestaurantAPI.Models;
@@ -54,9 +55,10 @@ namespace RestaurantAPI.Controllers
         }
 
         [HttpDelete]
-        public ActionResult DeleteAll([FromRoute] int restauratnId)
+        [Authorize(Policy = "Atleast20")]
+        public ActionResult DeleteAll([FromRoute] int restaurantId)
         {
-            _service.DeleteAllFromRestaurant(restauratnId);
+            _service.DeleteAllFromRestaurant(restaurantId);
 
             return NoContent();
         }
