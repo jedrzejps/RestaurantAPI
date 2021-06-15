@@ -9,6 +9,7 @@ using RestaurantAPI.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace RestaurantAPI.Services
@@ -105,11 +106,25 @@ namespace RestaurantAPI.Services
         {
             var baseQuery = _dbContext
                 .Restaurants
+                .Include(r => r.Address)
+                .Include(r => r.Dishes)
                 .Where(r => query.SearchPhrase == null ||
                 (r.Name.ToLower().Contains(query.SearchPhrase.ToLower()) ||
-                r.Description.ToLower().Contains(query.SearchPhrase.ToLower())))
-                .Include(r => r.Address)
-                .Include(r => r.Dishes);
+                r.Description.ToLower().Contains(query.SearchPhrase.ToLower())));
+
+            if (!string.IsNullOrWhiteSpace(query.SortBy))
+            {
+                var columnsSelector = new Dictionary<string, Expression<Func<Restaurant, object>>>
+                {
+                    {nameof(Restaurant.Name), r => r.Name},
+                    {nameof(Restaurant.Description), r => r.Description},
+                    {nameof(Restaurant.Category), r => r.Category}
+                };
+
+                baseQuery = query.SortDirection == SortDirection.ASC ?
+                    baseQuery.OrderBy(columnsSelector[query.SortBy]) :
+                    baseQuery.OrderByDescending(columnsSelector[query.SortBy]);
+            }
 
             var totalItemsCount = baseQuery.Count();
 
