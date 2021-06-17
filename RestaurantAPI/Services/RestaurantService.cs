@@ -51,7 +51,7 @@ namespace RestaurantAPI.Services
                 throw new NotFoundException("Restaurant not found");
 
             var authorizationResult = _authorizationService.AuthorizeAsync(_userContextService.User, restaurant,
-                new ResourceOperationRequirement(ResourceOperation.Update)).Result;
+                new List<IAuthorizationRequirement> { new ResourceOperationRequirement(ResourceOperation.Update) }).Result;
 
             if (!authorizationResult.Succeeded)
             {
